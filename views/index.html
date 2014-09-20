@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+
+{% block title %}Get Pocket Passport Strategy{% endblock %}
+
+{% block content %}
+<div class="container">
+	<div class="row">
+		<div class="col-xs-12 text-center">
+			<h1>Basic Stats</h1>
+			<p class="lead">Your pocket reading habits explained.</p>
+			{% if !user %}
+				<p><a class="btn btn-primary btn-lg" href="/auth/pocket">Login with Pocket Account</a></p>
+			{% else %}
+				<p>{{ user.username }} has {{total}} articles saved, and read {{read}}% of them.</p>
+
+				<p>Unread: {{countByStatus.unread}}</p>
+				<p>Read: {{countByStatus.read}}</p>
+
+			<p>{{countByTimeAdded}}</p>
+			<p>{{countByTimeRead}}</p>
+			<!--
+				{% for item in items.list %}
+					{% if loop.first %}<ul>{% endif %}
+					<li>{{ loop.index }} - 
+					{% if !item.given_title %}
+						{{ item.resolved_url }} - {{ item.status }} 
+					{% else %}	
+						{{ item.resolved_title }} - {{ item.status }} 
+					{% endif %}
+					</li>
+					{% if loop.last %}</ul>{% endif %}
+				{% endfor %}
+			-->
+			{% endif %}
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{
+  "name": "pocket-stats",
+  "version": "0.0.0",
+  "authors": [
+    "Raphael Guarilha <guarilha@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.2.0"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "pocket-stats",
+  "version": "0.0.1",
+  "description": "Pocket stats.",
+  "main": "./app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/guarilha/pocket-stats.git"
+  },
+  "dependencies": {
+    "consolidate": "0.5.0",
+    "express": "3.0.4",
+    "lodash": "^2.4.1",
+    "moment": "^2.8.3",
+    "passport": "^0.1.15",
+    "request": "^2.12.0",
+    "swig": "0.13.2",
+    "util": "^0.10.3"
+  },
+  "keywords": [
+    "passport",
+    "pocket",
+    "getpocket"
+  ]
+}
