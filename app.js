@@ -3,14 +3,14 @@ var _ = require('lodash'),
     cons = require('consolidate'),
     fs = require('fs'),
     moment = require('moment'),
-    swig = require('swig');
-
-var passport = require('passport'),
+    swig = require('swig'),
+    passport = require('passport'),
     util = require('util'),
-    PocketStrategy = require('./pocket-strategy-passport.js');
+    PocketStrategy = require('./pocket-strategy-passport.js'),
+    config = require('./config.json');;
 
 // Pocket App token
-POCKET_CONSUMER_KEY = "32449-81ca3bf1b78a3708d5cb2e00";
+POCKET_CONSUMER_KEY = config.key;
 
 if (POCKET_CONSUMER_KEY === "Pocket consumer key") {
     console.log('WARNING!!! Need a pocket costumer key');
@@ -49,7 +49,7 @@ server.configure(function() {
     server.use(express.bodyParser());
     server.use(express.methodOverride());
     server.use(express.session({
-        secret: 'keyboard cat'
+        secret: 'gato goethe kappa nabo'
     }));
     // Initialize Passport!  Also use passport.session() middleware, to support
     // persistent login sessions (recommended).
@@ -72,42 +72,6 @@ server.use(express.static('./public'));
 server.engine('.html', cons.swig);
 server.set('view engine', 'html');
 server.set('views', './views');
-
-/*function calculate(user, items) {
-    var countByStatus = _.countBy(_.values(items.list), function(item) {
-        return item.status == 0 ? 'unread' : 'read';
-    });
-    var countByDateAdded = _.countBy(_.values(items.list), function(item) {
-        return moment.unix(item.time_added * 1).format('YYYY-MM-DD');
-    });
-    var countByDateRead = _.countBy(_.values(items.list), function(item) {
-        if (item.time_read != 0) {
-            return moment.unix(item.time_read * 1).format('YYYY-MM-DD');
-        }
-    });
-
-    var countByTimeAdded = _.countBy(_.values(items.list), function(item) {
-        return moment.unix(item.time_added * 1).format('hh-mm');
-    });
-    var countByTimeRead = _.countBy(_.values(items.list), function(item) {
-        if (item.time_read != 0) {
-            return moment.unix(item.time_read * 1).format('hh-mm');
-        }
-    });
-
-    return {
-        user: user,
-        items: items,
-        total: countByStatus.read + countByStatus.unread,
-        read: (100 * countByStatus.read / (countByStatus.read + countByStatus.unread)).toFixed(2),
-        unread: (100 * countByStatus.unread / (countByStatus.read + countByStatus.unread)).toFixed(2),
-        countByStatus: countByStatus,
-        countByTimeAdded: JSON.stringify(countByTimeAdded),
-        countByTimeRead: JSON.stringify(countByTimeRead),
-        countByDateAdded: JSON.stringify(countByDateAdded),
-        countByDateRead: JSON.stringify(countByDateRead)
-    };
-}*/
 
 server.get('/', function(req, res) {
     console.log('Req to / by ' + (req.user ? req.user.username : 'unknown'));

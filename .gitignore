@@ -4,3 +4,4 @@ bower_components/*
 bower_components
 data/*
 data
+config.json

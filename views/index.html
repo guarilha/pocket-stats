@@ -8,44 +8,65 @@
             <p><a class="btn btn-primary btn-lg" href="/auth/pocket">Login with your Pocket Account</a>
             </p>
             {% else %}
-
-            <div id="articlepie"></div>
-            <script>
+        </div>
+        <script>
             d3.json('data/{{user.username}}.json', function(data) {
+                var articles = crossfilter(data);
+                // Divide between read and unread articles
+                var readUnread = articles.dimension(function(d) {
+                    return d.status == 0 ? 'Unread' : 'Read';
+                });
+                var readGroup = readUnread.group();
+                // Date dimension 
+                var dates = articles.dimension(function(d){
+                	return d.time_added
+                	
+                });
+                var added = dates.group().reduceSum(function(d){
+                	if(d.time_read != 0 && d.time_read != d.time_added)  {
+                		return	0;
+                	}
+                	if(d.time_read != 0 && d.time_read == d.time_added)  {
+                		return -1; 
+                	}
+                	if(d.time_read != 0 && d.time_added != 0)  {
+                		return 1;
+                	}
+                });
 
-                var ndx = crossfilter(data);
-                var all = ndx.groupAll();
-                var read = ndx.dimension(function(d) {
-                    return d.time_added;
-                });
-                var readGroup = read.group().reduceSum(function(d) {
-                    return d.status == 0 ? 'unread' : 'read';
-                });
-				console.log(read);
-                console.log(readGroup);
-                var articlePie = dc.pieChart("#articlepie");
-                articlePie.width(200)
+
+                var minDate = dates.bottom(1)[0].time_added;
+    			var maxDate = dates.top(1)[0].time_added;
+
+                var readPie = dc.pieChart("#readPie");
+                var readBar = dc.barChart("#readBar");
+
+                readPie.width(200)
                     .height(200)
                     .radius(80)
                     .innerRadius(30)
-                    .dimension(read)
+                    .dimension(readUnread)
                     .group(readGroup);
-                 dc.renderAll();
+
+                readBar.width(400)
+	                .height(180)
+	                .dimension(dates)
+	                .group(added)
+	                .x(d3.time.scale().domain([minDate, maxDate]))
+	                .xUnits(d3.time.days)
+	                .renderHorizontalGridLines(true)
+	                .centerBar(true)
+		            .elasticY(true)
+		            .brushOn(false);
+
+	            dc.renderAll();
             });
             </script>
-            <!--
-				{% for item in items.list %}
-					{% if loop.first %}<ul>{% endif %}
-					<li>{{ loop.index }} - 
-					{% if !item.given_title %}
-						{{ item.resolved_url }} - {{ item.status }} 
-					{% else %}	
-						{{ item.resolved_title }} - {{ item.status }} 
-					{% endif %}
-					</li>
-					{% if loop.last %}</ul>{% endif %}
-				{% endfor %}
-			-->
+        <div class="col-xs-6">
+            <div id="readPie"></div>
+        </div>    
+		<div class="col-xs-6">
+    		<div id="readBar"></div>
             {% endif %}
         </div>
     </div>
