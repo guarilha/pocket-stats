@@ -1,24 +1,39 @@
-{% extends 'layout.html' %}
-
-{% block title %}Get Pocket Passport Strategy{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% block title %}Pocket Stats{% endblock %} {% block content %}
 <div class="container">
-	<div class="row">
-		<div class="col-xs-12 text-center">
-			<h1>Basic Stats</h1>
-			<p class="lead">Your pocket reading habits explained.</p>
-			{% if !user %}
-				<p><a class="btn btn-primary btn-lg" href="/auth/pocket">Login with Pocket Account</a></p>
-			{% else %}
-				<p>{{ user.username }} has {{total}} articles saved, and read {{read}}% of them.</p>
+    <div class="row">
+        <div class="col-xs-12 text-center">
+            <h1>Pocket Stats</h1>
+            <p class="lead">Some insights from your Pocket reading habits.</p>
+            {% if !user %}
+            <p><a class="btn btn-primary btn-lg" href="/auth/pocket">Login with your Pocket Account</a>
+            </p>
+            {% else %}
 
-				<p>Unread: {{countByStatus.unread}}</p>
-				<p>Read: {{countByStatus.read}}</p>
+            <div id="articlepie"></div>
+            <script>
+            d3.json('data/{{user.username}}.json', function(data) {
 
-			<p>{{countByTimeAdded}}</p>
-			<p>{{countByTimeRead}}</p>
-			<!--
+                var ndx = crossfilter(data);
+                var all = ndx.groupAll();
+                var read = ndx.dimension(function(d) {
+                    return d.time_added;
+                });
+                var readGroup = read.group().reduceSum(function(d) {
+                    return d.status == 0 ? 'unread' : 'read';
+                });
+				console.log(read);
+                console.log(readGroup);
+                var articlePie = dc.pieChart("#articlepie");
+                articlePie.width(200)
+                    .height(200)
+                    .radius(80)
+                    .innerRadius(30)
+                    .dimension(read)
+                    .group(readGroup);
+                 dc.renderAll();
+            });
+            </script>
+            <!--
 				{% for item in items.list %}
 					{% if loop.first %}<ul>{% endif %}
 					<li>{{ loop.index }} - 
@@ -31,9 +46,9 @@
 					{% if loop.last %}</ul>{% endif %}
 				{% endfor %}
 			-->
-			{% endif %}
-		</div>
-	</div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 

@@ -1,6 +1,7 @@
 var _ = require('lodash'),
     express = require('express'),
     cons = require('consolidate'),
+    fs = require('fs'),
     moment = require('moment'),
     swig = require('swig');
 
@@ -57,6 +58,7 @@ server.configure(function() {
     server.use(server.router);
 
     server.use('/twbs', express.static(__dirname + '/bower_components/bootstrap/dist/css'));
+    server.use('/data', express.static(__dirname + '/data'));
 
 });
 
@@ -71,37 +73,64 @@ server.engine('.html', cons.swig);
 server.set('view engine', 'html');
 server.set('views', './views');
 
+/*function calculate(user, items) {
+    var countByStatus = _.countBy(_.values(items.list), function(item) {
+        return item.status == 0 ? 'unread' : 'read';
+    });
+    var countByDateAdded = _.countBy(_.values(items.list), function(item) {
+        return moment.unix(item.time_added * 1).format('YYYY-MM-DD');
+    });
+    var countByDateRead = _.countBy(_.values(items.list), function(item) {
+        if (item.time_read != 0) {
+            return moment.unix(item.time_read * 1).format('YYYY-MM-DD');
+        }
+    });
+
+    var countByTimeAdded = _.countBy(_.values(items.list), function(item) {
+        return moment.unix(item.time_added * 1).format('hh-mm');
+    });
+    var countByTimeRead = _.countBy(_.values(items.list), function(item) {
+        if (item.time_read != 0) {
+            return moment.unix(item.time_read * 1).format('hh-mm');
+        }
+    });
+
+    return {
+        user: user,
+        items: items,
+        total: countByStatus.read + countByStatus.unread,
+        read: (100 * countByStatus.read / (countByStatus.read + countByStatus.unread)).toFixed(2),
+        unread: (100 * countByStatus.unread / (countByStatus.read + countByStatus.unread)).toFixed(2),
+        countByStatus: countByStatus,
+        countByTimeAdded: JSON.stringify(countByTimeAdded),
+        countByTimeRead: JSON.stringify(countByTimeRead),
+        countByDateAdded: JSON.stringify(countByDateAdded),
+        countByDateRead: JSON.stringify(countByDateRead)
+    };
+}*/
+
 server.get('/', function(req, res) {
-    console.log('Req to /');
+    console.log('Req to / by ' + (req.user ? req.user.username : 'unknown'));
     if (req.user) {
-        pocketStrategy.getAllItems(req.user.accessToken, function(err, items) {
-            if (err) {
-                res.send('Something went wrong');
-                return;
-            }
-
-            var countByStatus = _.countBy(_.values(items.list), function(item) {
-                return item.status == 0 ? 'unread' : 'read';
-            });
-            var countByTimeAdded = _.countBy(_.values(items.list), function(item) {
-                return moment.unix(item.time_added * 1).format('L');
-            });
-            var countByTimeRead = _.countBy(_.values(items.list), function(item) {
-                return moment.unix(item.time_read * 1).format('L');
-            });
-            //console.log();
-
+        var jsonDownloaded = fs.existsSync(__dirname + '/data/' + req.user.username + '.json');
+        if (jsonDownloaded) {
             res.render('index', {
-                user: req.user,
-                items: items,
-                total: countByStatus.read + countByStatus.unread,
-                read: (100 * countByStatus.read / (countByStatus.read + countByStatus.unread)).toFixed(2),
-                unread: (100 * countByStatus.unread / (countByStatus.read + countByStatus.unread)).toFixed(2),
-                countByStatus: countByStatus,
-                countByTimeAdded: JSON.stringify(countByTimeAdded),
-                countByTimeRead: JSON.stringify(countByTimeRead)
+                user: req.user
             });
-        });
+        } else {
+            pocketStrategy.getAllItems(req.user.accessToken, function(err, items) {
+                if (err) {
+                    res.send('Something went wrong');
+                    return;
+                }
+                console.log(__dirname + '/data/' + req.user.username + '.json');
+                fs.writeFileSync(__dirname + '/data/' + req.user.username + '.json', JSON.stringify(_.values(items.list)));
+                res.render('index', {
+                    user: req.user
+                });
+            });
+        }
+
     } else {
         res.render('index', {
             user: req.user
